@@ -1,102 +1,109 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Constante de gravedad (m/s^2)
-g_tierra = 9.8
-g_luna = 1.62
+# Constantes gravitacionales (m/s^2)
+gravedad_tierra = 9.8
+gravedad_luna = 1.62
 
-# Función para calcular la posición en función del tiempo (caída libre)
-def posicion(t, y0, g):
-    return y0 - 0.5 * g * t**2
+# Función para calcular la altura en función del tiempo (caída libre)
+def calcular_altura(t, altura_inicial, gravedad):
+    return altura_inicial - 0.5 * gravedad * t**2
 
 # Función para calcular la velocidad en función del tiempo (caída libre)
-def velocidad(t, g):
-    return -g * t
+def calcular_velocidad(t, gravedad):
+    return -gravedad * t
 
-# Tiempo máximo de vuelo en función de la altura inicial
-def tiempo_vuelo(y0, g):
-    return np.sqrt(2 * y0 / g)
+# Función para determinar la altura inicial a partir del tiempo total de vuelo
+def obtener_altura_por_tiempo(tiempo_total, gravedad):
+    return 0.5 * gravedad * tiempo_total**2
 
-# Función para simular caída libre en la Tierra o en la Luna
-def simulacion_caida_libre(y0, g, planeta="Tierra"):
-    # Tiempo de vuelo hasta que la partícula llegue al suelo
-    t_vuelo = tiempo_vuelo(y0, g)
+# Función para calcular altura y velocidad en un instante dado
+def obtener_datos_instante(t, altura_inicial, gravedad):
+    altura = calcular_altura(t, altura_inicial, gravedad)
+    velocidad = calcular_velocidad(t, gravedad)
+    return altura, velocidad
 
+# Función para simular caída libre en un planeta
+def simular_caida_libre(altura_inicial, gravedad, nombre_planeta="Tierra"):
+    # Tiempo hasta que toca el suelo
+    tiempo_caida = np.sqrt(2 * altura_inicial / gravedad)
     # Generar un array de tiempos
-    tiempos = np.linspace(0, t_vuelo, num=500)
-
-    # Calcular posiciones y velocidades
-    posiciones = posicion(tiempos, y0, g)
-    velocidades = velocidad(tiempos, g)
+    tiempos = np.linspace(0, tiempo_caida, num=500)
+    # Calcular alturas y velocidades
+    alturas = calcular_altura(tiempos, altura_inicial, gravedad)
+    velocidades = calcular_velocidad(tiempos, gravedad)
 
     # Gráficos
     plt.figure(figsize=(10, 5))
-
-    # Posición vs Tiempo
+    # Altura vs Tiempo
     plt.subplot(1, 2, 1)
-    plt.plot(tiempos, posiciones)
-    plt.title(f"Posición vs Tiempo ({planeta})")
+    plt.plot(tiempos, alturas)
+    plt.title(f"Altura vs Tiempo ({nombre_planeta})")
     plt.xlabel("Tiempo (s)")
-    plt.ylabel("Posición (m)")
-
+    plt.ylabel("Altura (m)")
     # Velocidad vs Tiempo
     plt.subplot(1, 2, 2)
     plt.plot(tiempos, velocidades)
-    plt.title(f"Velocidad vs Tiempo ({planeta})")
+    plt.title(f"Velocidad vs Tiempo ({nombre_planeta})")
     plt.xlabel("Tiempo (s)")
     plt.ylabel("Velocidad (m/s)")
-
     plt.tight_layout()
     plt.show()
 
-# Función para lanzar una partícula hacia arriba
-def simulacion_lanzamiento_arriba(v0, g):
-    # Tiempo hasta alcanzar la altura máxima
-    t_subida = v0 / g
-
+# Función para simular un lanzamiento vertical
+def simular_lanzamiento_vertical(velocidad_inicial, gravedad):
+    # Tiempo hasta la altura máxima
+    tiempo_subida = velocidad_inicial / gravedad
     # Altura máxima
-    altura_maxima = v0 * t_subida - 0.5 * g * t_subida**2
-
-    # Tiempo total de vuelo (doble del tiempo de subida)
-    t_total_vuelo = 2 * t_subida
+    altura_maxima = velocidad_inicial * tiempo_subida - 0.5 * gravedad * tiempo_subida**2
+    # Tiempo total de vuelo
+    tiempo_total = 2 * tiempo_subida
 
     print(f"Altura máxima alcanzada: {altura_maxima:.2f} metros")
-    print(f"Tiempo total de vuelo: {t_total_vuelo:.2f} segundos")
+    print(f"Tiempo total de vuelo: {tiempo_total:.2f} segundos")
 
-    # Generar un array de tiempos hasta que regrese al suelo
-    tiempos = np.linspace(0, t_total_vuelo, num=500)
-
-    # Calcular posiciones y velocidades para el lanzamiento hacia arriba
-    posiciones = v0 * tiempos - 0.5 * g * tiempos**2
-    velocidades = v0 - g * tiempos
+    # Generar un array de tiempos
+    tiempos = np.linspace(0, tiempo_total, num=500)
+    # Calcular alturas y velocidades
+    alturas = velocidad_inicial * tiempos - 0.5 * gravedad * tiempos**2
+    velocidades = velocidad_inicial - gravedad * tiempos
 
     # Gráficos
     plt.figure(figsize=(10, 5))
-
-    # Posición vs Tiempo
+    # Altura vs Tiempo
     plt.subplot(1, 2, 1)
-    plt.plot(tiempos, posiciones)
-    plt.title("Posición vs Tiempo (lanzamiento hacia arriba)")
+    plt.plot(tiempos, alturas)
+    plt.title("Altura vs Tiempo (lanzamiento vertical)")
     plt.xlabel("Tiempo (s)")
-    plt.ylabel("Posición (m)")
-
+    plt.ylabel("Altura (m)")
     # Velocidad vs Tiempo
     plt.subplot(1, 2, 2)
     plt.plot(tiempos, velocidades)
-    plt.title("Velocidad vs Tiempo (lanzamiento hacia arriba)")
+    plt.title("Velocidad vs Tiempo (lanzamiento vertical)")
     plt.xlabel("Tiempo (s)")
     plt.ylabel("Velocidad (m/s)")
-
     plt.tight_layout()
     plt.show()
 
-# Simulación de caída libre en la Tierra
-y0 = float(input("Ingrese la altura inicial de la caída libre (metros): "))
-simulacion_caida_libre(y0, g_tierra, "Tierra")
+# Solicitar tiempo de vuelo y calcular la altura inicial
+tiempo_vuelo_usuario = float(input("Ingrese el tiempo total de vuelo (en segundos): "))
+altura_inicial_calculada = obtener_altura_por_tiempo(tiempo_vuelo_usuario, gravedad_tierra)
+print(f"Altura calculada para un tiempo de vuelo de {tiempo_vuelo_usuario} segundos en la Tierra: {altura_inicial_calculada:.2f} metros")
 
-# Simulación de caída libre en la Luna
-simulacion_caida_libre(y0, g_luna, "Luna")
+# Calcular datos para un instante específico
+instante_usuario = float(input("Ingrese un instante para calcular altura y velocidad (en segundos): "))
+altura_en_instante, velocidad_en_instante = obtener_datos_instante(
+    instante_usuario, altura_inicial_calculada, gravedad_tierra
+)
+print(f"Altura en t={instante_usuario} segundos: {altura_en_instante:.2f} metros")
+print(f"Velocidad en t={instante_usuario} segundos: {velocidad_en_instante:.2f} m/s")
 
-# Lanzamiento hacia arriba con rapidez de 2 m/s en la Tierra
-v0 = 2.0
-simulacion_lanzamiento_arriba(v0, g_tierra)
+# Simular caída libre en la Tierra
+simular_caida_libre(altura_inicial_calculada, gravedad_tierra, "Tierra")
+
+# Simular caída libre en la Luna
+simular_caida_libre(altura_inicial_calculada, gravedad_luna, "Luna")
+
+# Simular un lanzamiento vertical con una velocidad inicial de 2 m/s
+velocidad_inicial = 2.0
+simular_lanzamiento_vertical(velocidad_inicial, gravedad_tierra)
